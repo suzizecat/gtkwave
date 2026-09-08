@@ -335,6 +335,14 @@ static char* handle_get_item_info(WcpServer *server, WcpCommand *cmd)
     return response;
 }
 
+static char* handle_get_cursor(WcpServer *server, WcpCommand *cmd)
+{
+    GwTime pos = get_current_time();
+    char *response = wcp_response_get_cursor(pos);
+    return response;
+}
+
+
 static char* handle_set_item_color(WcpServer *server, WcpCommand *cmd)
 {
     (void)server;
@@ -690,6 +698,9 @@ static char* wcp_command_handler(WcpServer *server, WcpCommand *cmd, gpointer us
             
         case WCP_CMD_GET_ITEM_INFO:
             return handle_get_item_info(server, cmd);
+
+        case WCP_CMD_GET_CURSOR:
+            return handle_get_cursor(server, cmd);
             
         case WCP_CMD_SET_ITEM_COLOR:
             return handle_set_item_color(server, cmd);

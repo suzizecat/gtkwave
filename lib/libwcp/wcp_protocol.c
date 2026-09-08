@@ -25,6 +25,7 @@ static const char *supported_commands[] = {
     "zoom_to_fit",
     "load",
     "reload",
+    "get_cursor",
     NULL
 };
 
@@ -61,6 +62,7 @@ static WcpCommandType parse_command_type(const char *cmd_str)
     if (g_str_equal(cmd_str, "zoom_to_fit"))        return WCP_CMD_ZOOM_TO_FIT;
     if (g_str_equal(cmd_str, "load"))               return WCP_CMD_LOAD;
     if (g_str_equal(cmd_str, "reload"))             return WCP_CMD_RELOAD;
+    if (g_str_equal(cmd_str, "get_cursor"))         return WCP_CMD_GET_CURSOR; 
     /* clang-format on */
     
     return WCP_CMD_UNKNOWN;
@@ -611,6 +613,25 @@ char* wcp_response_item_info(GPtrArray *items)
     json_builder_end_object(builder);
     
     return wcp_json_builder_to_string(builder);
+}
+
+char* wcp_response_get_cursor(int64_t time)
+{
+    JsonBuilder *builder = json_builder_new();
+    json_builder_begin_object(builder);
+    json_builder_set_member_name(builder, "type");
+    json_builder_add_string_value(builder, "response");
+    
+    json_builder_set_member_name(builder, "command");
+    json_builder_add_string_value(builder, "get_cursor");
+
+    json_builder_set_member_name(builder, "timestamp");
+    json_builder_add_int_value(builder, time);
+
+    json_builder_end_object(builder);
+    
+    return wcp_json_builder_to_string(builder);
+
 }
 
 char* wcp_response_id_list(const char *command, GPtrArray *ids)

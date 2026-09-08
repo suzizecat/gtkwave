@@ -28,6 +28,7 @@ typedef enum {
     /* Query commands */
     WCP_CMD_GET_ITEM_LIST,      /* Get list of displayed items */
     WCP_CMD_GET_ITEM_INFO,      /* Get info about specific items */
+    WCP_CMD_GET_CURSOR,         /* Get the cursor position (time)*/
     
     /* Modification commands */
     WCP_CMD_SET_ITEM_COLOR,     /* Change item color */
@@ -144,7 +145,9 @@ char* wcp_response_error(const char *error_type,
                          const char *message,
                          GPtrArray *arguments);
 char* wcp_response_item_info(GPtrArray *items);
+char* wcp_response_get_cursor(int64_t time);
 char* wcp_response_id_list(const char *command, GPtrArray *ids);
+
 
 /* Create JSON event messages */
 char* wcp_event_waveforms_loaded(const char *source);
