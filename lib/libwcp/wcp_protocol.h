@@ -29,6 +29,7 @@ typedef enum {
     WCP_CMD_GET_ITEM_LIST,      /* Get list of displayed items */
     WCP_CMD_GET_ITEM_INFO,      /* Get info about specific items */
     WCP_CMD_GET_CURSOR,         /* Get the cursor position (time)*/
+    WCP_CMD_GET_VALUES,         /* Get signal values */
     
     /* Modification commands */
     WCP_CMD_SET_ITEM_COLOR,     /* Change item color */
@@ -59,6 +60,13 @@ typedef struct {
     char *type;  /* "signal", "marker" */
     char *id;
 } WcpItemInfo;
+
+/* Item value */
+typedef struct {
+    char *id;
+    char *val;
+    char *base; 
+} WcpItemValue;
 
 /* Marker information */
 typedef struct {
@@ -94,6 +102,13 @@ typedef struct {
             GPtrArray *items;  /* Array of char* */
             gboolean recursive;
         } add_items;
+
+        /* get_values*/
+        struct {
+            GPtrArray *items;  /* Array of char* */
+            gboolean recursive;
+            int64_t timestamp;
+        } get_values;
         
         /* add_markers */
         struct {
@@ -145,9 +160,9 @@ char* wcp_response_error(const char *error_type,
                          const char *message,
                          GPtrArray *arguments);
 char* wcp_response_item_info(GPtrArray *items);
+char* wcp_response_item_value(GPtrArray *items);
 char* wcp_response_get_cursor(int64_t time);
 char* wcp_response_id_list(const char *command, GPtrArray *ids);
-
 
 /* Create JSON event messages */
 char* wcp_event_waveforms_loaded(const char *source);

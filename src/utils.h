@@ -9,7 +9,10 @@
 #define GW_UTILS_H
 
 #include "gw-time.h"
+#include "gw-types.h"
+
 
 GwTime get_current_time(void);
+char *get_symbol_value_at_time(const GwSymbol *sym, GwTime tim);
 
 #endif
