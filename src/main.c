@@ -1983,6 +1983,7 @@ savefile_bail:
                      0); /* prevents shrinkage of signal/waves windows if no waves loaded */
 
     GwMarker *primary_marker = gw_project_get_primary_marker(GLOBALS->project);
+    g_signal_connect_after(primary_marker, "notify::position",G_CALLBACK(on_update_primary_marker), NULL);
     if (gw_marker_is_enabled(primary_marker)) {
         if (gw_marker_get_position(primary_marker) < GLOBALS->tims.first) {
             gw_marker_set_position(primary_marker, GLOBALS->tims.first);
@@ -2603,3 +2604,9 @@ void optimize_vcd_file(void)
     }
 }
 #endif
+
+void on_update_primary_marker(GObject *marker, GParamSpec *pspec, gpointer data)
+{
+    wcp_gtkwave_notify_cursor_set(gw_marker_get_position(GW_MARKER(marker)));
+}
+

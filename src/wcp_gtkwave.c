@@ -779,3 +779,10 @@ void wcp_gtkwave_notify_waveforms_loaded(const char *filename)
         wcp_server_emit_waveforms_loaded(g_wcp->server, filename);
     }
 }
+
+void wcp_gtkwave_notify_cursor_set(gint64 new_pos)
+{
+    if (g_wcp && g_wcp->server) {
+        wcp_server_emit_cursor_set(g_wcp->server, new_pos);
+    }
+}

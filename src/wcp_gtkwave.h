@@ -48,5 +48,12 @@ void wcp_gtkwave_shutdown(void);
  */
 void wcp_gtkwave_notify_waveforms_loaded(const char *filename);
 
+/** 
+ * Notify WCP client that the primary cursor has been
+ * moved.
+ * Should be tied to the position property of the marker,
+ * or called every time the marker is moved.
+ */
+void wcp_gtkwave_notify_cursor_set(gint64 new_pos);
 #endif /* WCP_GTKWAVE_H */
 

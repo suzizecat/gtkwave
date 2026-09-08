@@ -47,6 +47,7 @@ void kill_stems_browser_single(void *G);
 
 /* prototype only used in main.c */
 void menu_reload_waveform_marshal(GtkWidget *widget, gpointer data);
+void on_update_primary_marker(GObject *marker, GParamSpec *pspec, gpointer data);
 
 /* function for spawning vcd conversions */
 void optimize_vcd_file(void);

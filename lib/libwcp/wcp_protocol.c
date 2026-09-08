@@ -656,3 +656,22 @@ char* wcp_event_waveforms_loaded(const char *source)
     
     return wcp_json_builder_to_string(builder);
 }
+
+char* wcp_event_cursor_set(const gint64 timestamp)
+{
+    JsonBuilder *builder = json_builder_new();
+    
+    json_builder_begin_object(builder);
+    json_builder_set_member_name(builder, "type");
+    json_builder_add_string_value(builder, "event");
+    
+    json_builder_set_member_name(builder, "event");
+    json_builder_add_string_value(builder, "cursor_set");
+    
+    json_builder_set_member_name(builder, "timestamp");
+    json_builder_add_int_value(builder, timestamp);
+    
+    json_builder_end_object(builder);
+    
+    return wcp_json_builder_to_string(builder);
+}
