@@ -166,6 +166,6 @@ char* wcp_response_id_list(const char *command, GPtrArray *ids);
 
 /* Create JSON event messages */
 char* wcp_event_waveforms_loaded(const char *source);
-char* wcp_event_cursor_set(const gint64 timestamp);
+char* wcp_event_cursor_set(int64_t timestamp);
 
 #endif /* WCP_PROTOCOL_H */

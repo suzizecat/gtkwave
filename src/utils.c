@@ -13,7 +13,7 @@
 GwTime get_current_time(void)
 {
     GwMarker *primary_marker = gw_project_get_primary_marker(GLOBALS->project);
-    if (!primary_marker || !gw_marker_is_enabled(primary_marker))
+    if (!gw_marker_is_enabled(primary_marker))
         return 0 ;
     else 
         return gw_marker_get_position(primary_marker);
@@ -21,8 +21,7 @@ GwTime get_current_time(void)
 
 char* get_symbol_value_at_time(const GwSymbol *sym, GwTime tim)
 {
-    if (!sym)
-        return NULL;
+    g_return_val_if_fail(sym != NULL, NULL);
 
     /* If tim < 0 use primary marker if enabled, use 0 as default */
     if (tim < 0) {
@@ -61,13 +60,7 @@ char* get_symbol_value_at_time(const GwSymbol *sym, GwTime tim)
     }
 
     /* Build a minimal temporary GwTrace (on stack) used by converters */
-    GwTrace t;
-    memset(&t, 0, sizeof(t));
-
-    // if(!strcmp(sym->name, "core_top.u_mot_1.K_PWMRES"))
-    // {
-    //     int toto = 0;
-    // }
+    GwTrace t = {0};
 
     t.shift = 0; /* adjust if you need per-trace shift */
     if (!GLOBALS->hier_max_level)
@@ -113,18 +106,9 @@ char* get_symbol_value_at_time(const GwSymbol *sym, GwTime tim)
     /* Scalar simple variable */
     if (!nd->extvals) {
         unsigned char h_val = hptr->v.h_val;
-        if (nd->vartype == GW_VAR_TYPE_VCD_EVENT) {
-            /* event-handling logic is used in UI; approximate: produce '1' only if this entry is at marker pos */
-            GwMarker *primary_marker = gw_project_get_primary_marker(GLOBALS->project);
-            if (primary_marker) {
-                GwTime primary_pos = gw_marker_get_position(primary_marker);
-                h_val = (hptr->time >= GLOBALS->tims.first && (primary_pos - GLOBALS->shift_timebase) == hptr->time)
-                            ? GW_BIT_1
-                            : GW_BIT_0;
-            }
-        }
-        if (t.flags & TR_INVERT)
-            h_val = gw_bit_invert(h_val);
+        // TODO: support inverted traces
+        // if (t.flags & TR_INVERT)
+        //     h_val = gw_bit_invert(h_val);
 
         char *rc = calloc_2(1, 2 * sizeof(char));
         rc[0] = gw_bit_to_char(h_val);

@@ -54,6 +54,6 @@ void wcp_gtkwave_notify_waveforms_loaded(const char *filename);
  * Should be tied to the position property of the marker,
  * or called every time the marker is moved.
  */
-void wcp_gtkwave_notify_cursor_set(gint64 new_pos);
+void wcp_gtkwave_notify_cursor_set(GwTime new_pos);
 #endif /* WCP_GTKWAVE_H */
 

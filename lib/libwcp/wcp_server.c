@@ -288,7 +288,7 @@ void wcp_server_emit_waveforms_loaded(WcpServer *server, const char *source)
 }
 
 
-void wcp_server_emit_cursor_set(WcpServer *server, gint64 new_pos)
+void wcp_server_emit_cursor_set(WcpServer *server, int64_t new_pos)
 {
     g_return_if_fail(server != NULL);  
     if (!server->client_connected) return;
