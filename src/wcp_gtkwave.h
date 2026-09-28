@@ -13,6 +13,7 @@
 #include <stdint.h>
 
 #include "wcp_server.h"
+#include "gw-time.h"
 
 #ifndef WCP_DEFAULT_PORT
 #define WCP_DEFAULT_PORT 8765

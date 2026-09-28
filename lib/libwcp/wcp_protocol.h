@@ -50,6 +50,13 @@ typedef enum {
     WCP_CMD_RELOAD,             /* Reload waveform from disk */
 } WcpCommandType;
 
+typedef enum {
+    WCP_BASE_UNKNOWN = 0,
+    WCP_BASE_BIN     = 1,
+    WCP_BASE_OCT     = 2,
+    WCP_BASE_DEC     = 3,
+    WCP_BASE_HEX     = 4
+} WcpBaseID;
 /* ============================================================================
  * Data Structures
  * ============================================================================ */
@@ -65,7 +72,7 @@ typedef struct {
 typedef struct {
     char *id;
     char *val;
-    char *base; 
+    WcpBaseID base; 
 } WcpItemValue;
 
 /* Marker information */
@@ -108,6 +115,10 @@ typedef struct {
             GPtrArray *items;  /* Array of char* */
             gboolean recursive;
             int64_t timestamp;
+            // Not actually provided in WCP JSON but avoid special
+            // timestamp value for default (when timestamp is not
+            // provided in the get_values command).
+            gboolean timestamp_provided;
         } get_values;
         
         /* add_markers */

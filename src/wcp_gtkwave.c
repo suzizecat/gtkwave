@@ -18,6 +18,7 @@
 #include "signal_list.h"
 #include "symbol.h"
 #include "wavewindow.h"
+#include "wcp_protocol.h"
 #include "zoombuttons.h"
 #include "utils.h"
 
@@ -120,7 +121,6 @@ static void wcp_item_value_free(gpointer data)
     WcpItemValue *value = data;
     g_free(value->id);
     g_free(value->val);
-    g_free(value->base);
     g_free(value);
 }
 
@@ -371,6 +371,9 @@ static char* handle_get_values(WcpServer *server, WcpCommand *cmd)
 
     GPtrArray *results = g_ptr_array_new_with_free_func(wcp_item_value_free);
 
+    // Get the timestamp used to lookup data
+    GwTime used_time = cmd->data.get_values.timestamp_provided ? cmd->data.get_values.timestamp : get_current_time();
+
     if (cmd->data.add_items.items) {
 
         GPtrArray *symbols = g_ptr_array_new();
@@ -379,28 +382,32 @@ static char* handle_get_values(WcpServer *server, WcpCommand *cmd)
         {
             const char *item_designator = g_ptr_array_index(cmd->data.add_items.items, i);
 
+            // If the item is a WCP item (aliased and available in the wcp map.)
+            // Directly adds the information from associated trace.
             GwTrace *t = wcp_item_map_lookup_item(&g_wcp->traces, item_designator);
             if (t) {
                 WcpItemValue *info = g_new0(WcpItemValue, 1);
                 info->id = g_strdup(item_designator);
-                info->val= g_strdup(t->asciivalue);
+                char* item_value = get_trace_value_at_time(t,used_time);
+                info->val= g_strdup(item_value);
+                free_2(item_value);
 
                 switch (t->flags & (TR_BIN | TR_HEX | TR_DEC | TR_OCT)) 
                 {
                     case TR_BIN:
-                        info->base = g_strdup("bin");
-                        break;
-                    case TR_HEX:
-                        info->base = g_strdup("hex");
-                        break;
-                    case TR_DEC:
-                        info->base = g_strdup("dec");
+                        info->base = WCP_BASE_BIN;
                         break;
                     case TR_OCT:
-                        info->base = g_strdup("oct");
+                        info->base = WCP_BASE_OCT;
+                        break;
+                    case TR_DEC:
+                        info->base = WCP_BASE_DEC;
+                        break;
+                    case TR_HEX:
+                        info->base = WCP_BASE_HEX;
                         break;
                     default:
-                        info->base = g_strdup("oth");                       
+                        info->base = WCP_BASE_UNKNOWN;                       
                 }
                 
                     
@@ -408,13 +415,16 @@ static char* handle_get_values(WcpServer *server, WcpCommand *cmd)
                 continue;
             }
             
+            // If the targeted item is recognized as a symbol, adds it 
+            // to the symbol list, to be processed in a second time.
             GwSymbol *sym = gw_dump_file_lookup_symbol(GLOBALS->dump_file, item_designator);
             if (sym) {
                 g_ptr_array_add(symbols, sym);
                 continue;
             }
        
-
+            // If the targeted item is recognized as a scope, adds everything 
+            // to the symbol list, to be processed in a second time.
             GwTreeNode *scope = wcp_find_scope_node(item_designator);
             if (scope) {
                 wcp_collect_scope_symbols(scope->child, cmd->data.add_items.recursive, symbols);
@@ -426,21 +436,23 @@ static char* handle_get_values(WcpServer *server, WcpCommand *cmd)
             return wcp_response_error("invalid_item", g_strconcat("Unknown item id ", item_designator, NULL), NULL);
         }
 
+        // For unprocessed symbol, get their value at the lookup time.
         for (unsigned int j = 0; j < symbols->len; j++) {
                 GwSymbol* sym = g_ptr_array_index(symbols, j);
-                char* item_value = get_symbol_value_at_time(sym,cmd->data.get_values.timestamp);
+                char* item_value = get_symbol_value_at_time(sym,used_time);
                 if (item_value)
                 {
                     WcpItemValue *info = g_new0(WcpItemValue, 1);
                     info->id = g_strdup(sym->name);
                     info->val = g_strdup(item_value);
-                    info->base = g_strdup("hex");
+                    info->base = WCP_BASE_HEX;
                     g_ptr_array_add(results, info);
                     free_2(item_value);
                     // Item value will be freed when freeing info, much later on
                     continue;
                 }
         }
+        
 
         g_ptr_array_free(symbols, TRUE);          
     }

@@ -7,6 +7,7 @@
 
 #include "utils.h"
 #include "globals.h"
+#include "gw-types.h"
 #include <string.h>
 
 
@@ -19,14 +20,9 @@ GwTime get_current_time(void)
         return gw_marker_get_position(primary_marker);
 }
 
-char* get_symbol_value_at_time(const GwSymbol *sym, GwTime tim)
+char* get_symbol_value_at_time(const GwSymbol *sym, GwTime time)
 {
     g_return_val_if_fail(sym != NULL, NULL);
-
-    /* If tim < 0 use primary marker if enabled, use 0 as default */
-    if (tim < 0) {
-        tim = get_current_time();
-    }
 
     GwNode *nd = sym->n;
 
@@ -98,8 +94,15 @@ char* get_symbol_value_at_time(const GwSymbol *sym, GwTime tim)
     t.vector = FALSE;
     t.n.nd = nd;
 
+    return get_trace_value_at_time(&t, time);
+    
+}
+
+char *get_trace_value_at_time(GwTrace *trace, GwTime time)
+{
+    GwNode* nd = trace->n.nd;
     /* Find history entry at desired time (bsearch_node expects key = time - t.shift) */
-    GwHistEnt *hptr = bsearch_node(nd, tim - t.shift);
+    GwHistEnt *hptr = bsearch_node(nd, time - trace->shift);
     if (!hptr)
         return NULL;
 
@@ -118,12 +121,12 @@ char* get_symbol_value_at_time(const GwSymbol *sym, GwTime tim)
     /* Extended / vector values: may be real/string/vector */
     if (hptr->flags & GW_HIST_ENT_FLAG_REAL) {
         if (!(hptr->flags & GW_HIST_ENT_FLAG_STRING)) {
-            return convert_ascii_real(&t, &hptr->v.h_double);
+            return convert_ascii_real(trace, &hptr->v.h_double);
         } else {
             return convert_ascii_string((char *)hptr->v.h_vector);
         }
     } else {
         /* hptr->v.h_vector is a char* representation */
-        return convert_ascii_vec(&t, hptr->v.h_vector);
+        return convert_ascii_vec(trace, hptr->v.h_vector);
     }
 }

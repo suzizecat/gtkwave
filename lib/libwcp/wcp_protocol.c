@@ -5,6 +5,7 @@
  */
 
 #include "wcp_protocol.h"
+#include "json-glib/json-glib.h"
 #include <limits.h>
 #include <stddef.h>
 #include <string.h>
@@ -417,6 +418,10 @@ WcpCommand* wcp_parse_command(const char *json_str, GError **error)
                 }
                 cmd->data.get_values.recursive = json_node_get_boolean(node);
             }
+
+            // Default to no timestamp provided.
+            cmd->data.get_values.timestamp_provided = FALSE;
+
             if (json_object_has_member(obj, "timestamp")) {
                 JsonNode* node = json_object_get_member(obj, "timestamp");
                 if(! JSON_NODE_HOLDS_VALUE(node) || 
@@ -425,12 +430,13 @@ WcpCommand* wcp_parse_command(const char *json_str, GError **error)
                         "Field 'time' shall be an integer");
                      break;
                 }
+                cmd->data.get_values.timestamp_provided = TRUE;
                 cmd->data.get_values.timestamp = json_node_get_int(node);
             } else {
-                // Time default to negative value, as it will be used later-on to signify
-                // "on marker position". see the get_value_at_time function. 
-                // -1 Seems to be actually internally used.
-                cmd->data.get_values.timestamp = -2; 
+                // As negative values will be actually supported, any value here will be fine.
+                // The information about the timestamp validity is in 
+                // get_values.timestamp_provided defaulted to FALSE.
+                cmd->data.get_values.timestamp = 0; 
             }
             cmd_valid = TRUE;
             break;
@@ -701,7 +707,7 @@ char* wcp_response_item_value(GPtrArray *items)
             json_builder_add_string_value(builder, info->val);
                         
             json_builder_set_member_name(builder, "base");
-            json_builder_add_string_value(builder, info->base);
+            json_builder_add_int_value(builder, info->base);
 
             json_builder_end_object(builder);
         }

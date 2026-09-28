@@ -13,6 +13,7 @@
 
 
 GwTime get_current_time(void);
-char *get_symbol_value_at_time(const GwSymbol *sym, GwTime tim);
+char *get_symbol_value_at_time(const GwSymbol *sym, GwTime time);
+char *get_trace_value_at_time(GwTrace *trace, GwTime time);
 
 #endif
