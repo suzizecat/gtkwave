@@ -631,6 +631,11 @@ static const GDBusInterfaceVTable DBUS_VTABLE = {
     .method_call = on_dbus_method_call,
 };
 
+static void on_update_primary_marker(GObject *marker, GParamSpec *pspec, gpointer data)
+{
+    wcp_gtkwave_notify_cursor_set(gw_marker_get_position(GW_MARKER(marker)));
+}
+
 static void on_bus_acquired(GDBusConnection *connection, const gchar *name, gpointer user_data)
 {
     GDBusNodeInfo *node_info =
@@ -2605,8 +2610,4 @@ void optimize_vcd_file(void)
 }
 #endif
 
-void on_update_primary_marker(GObject *marker, GParamSpec *pspec, gpointer data)
-{
-    wcp_gtkwave_notify_cursor_set(gw_marker_get_position(GW_MARKER(marker)));
-}
 
